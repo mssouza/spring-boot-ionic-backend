@@ -1,5 +1,6 @@
 package br.com.local.cursomc.resources;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import br.com.local.cursomc.domain.Categoria;
 import br.com.local.cursomc.domain.Cliente;
+import br.com.local.cursomc.dto.CategoriaDTO;
 import br.com.local.cursomc.dto.ClienteDTO;
+import br.com.local.cursomc.dto.ClienteNewDTO;
 import br.com.local.cursomc.services.ClienteService;
 @RestController
 @RequestMapping(value="/clientes")
@@ -32,11 +37,19 @@ public class ClienteResource {
 		return ResponseEntity.ok().body(cliente);
 	}
 	
+	@RequestMapping(method=RequestMethod.POST)
+	public ResponseEntity<Void> insert(@Valid @RequestBody ClienteNewDTO clienteDTO){
+		Cliente cliente = clienteService.fromDTO(clienteDTO);
+		cliente = clienteService.insert(cliente);
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(cliente.getId()).toUri();			
+		return ResponseEntity.created(uri).build();
+	}
+	
 	@RequestMapping(value="/{id}",method=RequestMethod.PUT)
 	public ResponseEntity<Void> update(@Valid  @RequestBody ClienteDTO clienteDTO, @PathVariable Integer id){
-		Cliente Cliente = clienteService.fromDTO(clienteDTO);
-		Cliente.setId(id);
-		Cliente = clienteService.update(Cliente);
+		Cliente cliente = clienteService.fromDTO(clienteDTO);
+		cliente.setId(id);
+		cliente = clienteService.update(cliente);
 	//	URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(Cliente.getId()).toUri();			
 		return ResponseEntity.noContent().build();
 	}
